@@ -1,0 +1,33 @@
+WORLD DEVELOPER SIMULATION 
+Tentang SendPick: 
+SendPick adalah platform digital untuk manajemen logistik yang menghubungkan 
+pelanggan, vendor, dan penyedia armada dalam satu sistem terpadu. Aplikasi ini menangani 
+proses seperti Job Order, Manifest, Tracking Armada, Integrasi API eksternal (misalnya 
+Google Maps, WhatsApp, atau Payment Gateway). Fokus utama SendPick adalah 
+menciptakan sistem yang efisien, transparan, dan data-driven untuk perusahaan logistik di 
+Indonesia. 
+Tujuan Technical Test 
+Menilai kemampuan kandidat dalam: 
+1. Problem Solving di konteks proyek logistik SendPick. 
+2. Kolaborasi dengan AI Tools (seperti Vibecode, ChatGPT, Copilot) secara efektif. 
+3. Pemahaman API, Database, dan Integrasi 3rd Party. 
+4. Efisiensi kerja remote & self-management. 
+Bagian 1 — Real Case Simulation (8 jam total) 
+Kandidat diminta membuat Dashboard Mini SendPick dengan fitur: 
+1. Login Page (dummy authentication) 
+2. List Job Order (JO) — tabel dinamis (search, sort, pagination) 
+3. Detail Job Order — menampilkan data manifest & tombol “Track via Map” (Google 
+Maps API) 
+4. Integrasi API eksternal (OpenWeather, RajaOngkir, atau Google Distance Matrix) 
+5. Gunakan GitHub untuk versioning (commit bertahap).
+
+kebutuhan
+Teknologi yang Digunakan
+Backend: Node.js (Express)
+Frontend: Vite (Vue.js) + Tailwind CSS
+Database (opsional): JSON dummy
+Versioning: GitHub
+Testing: Postman / Insomnia
+Bonus: Docker & Swagger Docs
+API eksternal: OpenWeather
+Monolith Frontend & Backend 1 Folders
