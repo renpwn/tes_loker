@@ -1,0 +1,94 @@
+{% load static %}
+{% load format %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Form Produk</title>
+  <link rel="stylesheet" href="{% static 'css/dark.css' %}">
+</head>
+<body>
+
+<div class="container">
+  <h2>✏️ Form Produk</h2>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <!-- Error global -->
+    {% if request.method == "POST" and serializer.errors %}
+      <div class="error">
+        {{ serializer.errors }}
+      </div>
+    {% endif %}
+
+    <!-- Nama Produk -->
+    <div class="form-group">
+      <label>Nama Produk</label>
+      <input type="text"
+             name="nama_produk"
+             value="{{ serializer.instance.nama_produk|default:'' }}"
+             required>
+      {% if request.method == "POST" and serializer.errors %}
+        <div class="error">
+          {{ serializer.errors.nama_produk }}
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Harga -->
+    <div class="form-group">
+      <label>Harga</label>
+      <input type="text"
+             inputmode="numeric"
+             pattern="[0-9.]*"
+             name="harga"
+             value="{{ serializer.instance.harga|default:''|rupiah }}"
+             oninput="formatHarga(this)"
+             required>
+      {% if request.method == "POST" and serializer.errors %}
+        <div class="error">
+          {{ serializer.errors.harga }}
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Kategori -->
+    <div class="form-group">
+      <label>Kategori</label>
+      <select name="kategori">
+        {% for k in serializer.fields.kategori.queryset.all %}
+          <option value="{{ k.id }}"
+            {% if serializer.initial.kategori == k.id %}selected{% endif %}>
+            {{ k.nama_kategori }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Status -->
+    <div class="form-group">
+      <label>Status</label>
+      <select name="status">
+        {% for s in serializer.fields.status.queryset.all %}
+          <option value="{{ s.id }}"
+            {% if serializer.initial.status == s.id %}selected{% endif %}>
+            {{ s.nama_status }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <button type="submit">💾 Simpan</button>
+    <a href="{% url 'produk_list' %}">⬅️ Kembali</a>
+  </form>
+</div>
+
+<script>
+function formatHarga(el) {
+  let value = el.value.replace(/\D/g, ''); // hapus selain angka
+  el.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+</script>
+</body>
+</html>

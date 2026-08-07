@@ -1,0 +1,109 @@
+{% load static %}
+{% load format %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Produk Bisa Dijual</title>
+  <link rel="stylesheet" href="{% static 'css/dark.css' %}">
+</head>
+<body>
+
+<div class="container">
+   <!-- Header row -->
+  <div class="header-row">
+    <div>
+      <h1>📦 Produk Bisa Dijual</h1>
+    
+      <!-- Action buttons -->
+      <div style="margin-top: 15px;">
+        <a href="{% url 'produk_create' %}">➕ Tambah Produk</a> |
+        <a href="{% url 'produk_delete_all' %}"
+           class="btn-delete"
+           onclick="return confirm('Yakin ingin menghapus SEMUA produk?')">
+           🗑️ Hapus Semua Produk
+        </a>
+      </div>
+    </div>
+    <form method="get" style="margin:15px 0;">
+        <label>Filter Status:</label>
+      
+        <select name="status" onchange="this.form.submit()">
+          <option value="bisa dijual"
+            {% if status_filter == "bisa dijual" %}selected{% endif %}>
+            Bisa Dijual
+          </option>
+      
+          <option value="tidak bisa dijual"
+            {% if status_filter == "tidak bisa dijual" %}selected{% endif %}>
+            Tidak Bisa Dijual
+          </option>
+      
+          <option value="all"
+            {% if status_filter == "all" %}selected{% endif %}>
+            Semua
+          </option>
+        </select>
+      </form>
+    </div>
+
+  <!-- Table -->
+  <table>
+    <thead>
+      <tr>
+        <th>Nama Produk</th>
+        <th>Harga</th>
+        <th>Kategori</th>
+        <th>Status</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in produk %}
+      <tr>
+        <td>{{ p.nama_produk }}</td>
+        <td class="harga">
+          <div class="harga-wrap">
+            <span class="rp">Rp</span>
+            <span class="nominal">{{ p.harga|rupiah }}</span>
+          </div>
+        </td>
+        <td>{{ p.kategori.nama_kategori }}</td>
+        <td>
+          {% if p.status.nama_status == "bisa dijual" %}
+            <span class="status status-ok">
+              ✅ Bisa Dijual
+            </span>
+          {% else %}
+            <span class="status status-no">
+              ❌ Tidak Bisa Dijual
+            </span>
+          {% endif %}
+        </td>
+        <td class="aksi">
+          <a href="{% url 'produk_edit' p.id %}">✏️ Edit</a> |
+          <a href="{% url 'produk_delete' p.id %}"
+             class="btn-delete"
+             onclick="return confirm('Yakin ingin menghapus produk ini?')">
+             🗑️ Hapus
+          </a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5">Tidak ada data.
+          {% if is_empty %}
+            klik 👉
+            <a href="{% url 'fetch_produk' %}">
+               📥 Ambil Data dari Server 
+            </a>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+</body>
+</html>

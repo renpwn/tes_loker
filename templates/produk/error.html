@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Error Fetch API</title>
+  <link rel="stylesheet" href="{% static 'css/dark.css' %}">
+</head>
+<body>
+
+<div class="container">
+  <h2 style="color:#ef5350;">❌ Gagal Mengambil Data</h2>
+
+  <p>
+    Terjadi kesalahan saat mengambil data dari server FastPrint.
+  </p>
+
+  <div style="margin-top:15px; padding:15px; background:#2a2a2a; border-radius:6px;">
+    <strong>Pesan Error:</strong><br>
+    {{ message }}
+    {% if debug_username %}
+      <hr style="margin:20px 0; border-color:#333;">
+      
+      <h3>🔍 Debug Credential</h3>
+      
+      <div style="background:#1e1e1e;padding:15px;border-radius:6px;">
+        <p><strong>Username dikirim:</strong><br>
+           <code>{{ debug_username }}</code>
+        </p>
+      
+        <p><strong>Password:</strong><br>
+           <code>{{ debug_password }}</code>
+        </p>
+        
+        <p><strong>Password (MD5):</strong><br>
+           <code>{{ debug_password_md5 }}</code>
+        </p>
+      </div>
+    {% endif %}
+  </div>
+
+  <div style="margin-top:20px;">
+    <a href="{% url 'produk_list' %}">⬅️ Kembali ke Halaman Produk</a>
+  </div>
+</div>
+
+</body>
+</html>
