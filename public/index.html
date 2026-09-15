@@ -173,8 +173,8 @@
                         idpel,
                         idpel2: result.idpelanggan2 || '',
                         idpel3: result.idpelanggan3 || '',
-                        nama: result.nama || result.idpelanggan2 || 'N/A',
-                        alamat: result.alamat || result.idpelanggan2 || 'N/A',
+                        nama: result.customername || '',
+                        alamat: result.customeraddress || '',
                         nominal,
                         admin,
                         total_bayar: total,
@@ -184,7 +184,37 @@
 
                     document.getElementById('valNama').textContent = inquiryDataGlobal.nama;
                     document.getElementById('valAlamat').textContent = inquiryDataGlobal.alamat;
-                    document.getElementById('valPeriode').textContent = result.jumlah_bulan ? `${result.jumlah_bulan} Bulan` : '-';
+                    
+                    // 🔑 Ambil periode dari rincian bulan
+                    const bulanId = {
+                        '1':'JAN','2':'FEB','3':'MAR','4':'APR','5':'MEI','6':'JUN',
+                        '7':'JUL','8':'AGS','9':'SEP','10':'OKT','11':'NOV','12':'DES'
+                    };
+                    let periodeArr = [];
+                    for (let i = 1; i <= 6; i++) {
+                        const bln = result[`monthperiod${i}`];
+                        const thn = result[`yearperiod${i}`];
+                        if (bln && thn) {
+                            periodeArr.push(`${bulanId[String(bln)] || bln} ${thn}`);
+                        }
+                    }
+                    let periodeText = '-';
+                    if (periodeArr.length > 0) {
+                        const first = periodeArr[0];
+                        const last = periodeArr[periodeArr.length - 1];
+                        const jumlah = periodeArr.length;
+                        
+                        if (jumlah === 1) {
+                            periodeText = `${first} (1 Bulan)`;
+                        } else {
+                            periodeText = `${first} - ${last} (${jumlah} Bulan)`;
+                        }
+                    } else if (result.billquantity) {
+                        periodeText = `${result.billquantity} Bulan`;
+                    }
+
+                    document.getElementById('valPeriode').textContent = periodeText;
+
                     document.getElementById('valNominal').textContent = 'Rp ' + nominal.toLocaleString('id-ID');
                     document.getElementById('valAdmin').textContent = 'Rp ' + admin.toLocaleString('id-ID');
                     document.getElementById('valTotal').textContent = 'Rp ' + total.toLocaleString('id-ID');
