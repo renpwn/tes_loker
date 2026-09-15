@@ -1,399 +1,76 @@
-# PPOB PDAM
+# 🚰 PPOB PDAM — Rajabiller Integration
 
-Aplikasi **PPOB pembayaran tagihan PDAM** yang terintegrasi dengan **Rajabiller API**.
+Aplikasi PPOB untuk **inquiry dan pembayaran tagihan PDAM** menggunakan Rajabiller API.
 
-Mendukung:
+Mendukung dua produk:
 
-- PDAM Sidoarjo — `WASDA`
-- PDAM Bondowoso — `WABONDO`
+- 🟢 **WASDA** — PDAM Sidoarjo
+- 🔵 **WABONDO** — PDAM Bondowoso
 
-## Preview Hasil Program
+---
 
-### 1. Halaman Inquiry
+## 🎯 Demo Flow
 
-User memasukkan atau memilih **ID Pelanggan**, kemudian aplikasi mengambil informasi tagihan dari provider.
+Aplikasi memiliki alur pembayaran end-to-end:
 
 ```text
-┌─────────────────────────────────────────────┐
-│              PPOB PDAM                      │
-├─────────────────────────────────────────────┤
-│ Wilayah                                     │
-│ [ WASDA ▼ ]                                 │
-│                                             │
-│ ID Pelanggan                                │
-│ [ 01002676                              ]   │
-│                                             │
-│              [ CEK TAGIHAN ]                │
-└─────────────────────────────────────────────┘
-```
-
-Hasil inquiry menampilkan informasi pelanggan dan tagihan:
-
-```text
-Nama          : Nama Pelanggan
-ID Pelanggan  : 01002676
-Alamat        : Alamat Pelanggan
-
-Tagihan       : Rp50.000
-Biaya Admin   : Rp2.500
-Total Bayar   : Rp52.500
-
-              [ BAYAR SEKARANG ]
-```
-
-### 2. Pembayaran Berhasil
-
-Setelah pembayaran berhasil, transaksi disimpan ke database SQLite.
-
-```text
-✓ TRANSAKSI BERHASIL
-
-ID Pelanggan : 01002676
-Nama         : Nama Pelanggan
-Tagihan      : Rp50.000
-Admin        : Rp2.500
-Total Bayar  : Rp52.500
-
-Ref. Transaksi : PAY123456789
-
-              [ CETAK STRUK ]
-```
-
-### 3. Riwayat Transaksi
-
-Aplikasi menyediakan halaman history untuk melihat transaksi yang sudah berhasil.
-
-```text
-RIWAYAT TRANSAKSI
-
-┌────────────┬──────────────┬────────────┬──────────┐
-│ ID Pelanggan │ Nama       │ Total      │ Status   │
-├────────────┼──────────────┼────────────┼──────────┤
-│ 01002676   │ Pelanggan A  │ Rp52.500   │ BERHASIL │
-│ 01002677   │ Pelanggan B  │ Rp75.000   │ BERHASIL │
-└────────────┴──────────────┴────────────┴──────────┘
-```
-
-### 4. Cetak Struk
-
-Struk dapat dibuka dari transaksi dan dicetak menggunakan fitur print browser.
-
----
-
-## Fitur
-
-- Cek/inquiry tagihan PDAM
-- Pembayaran tagihan
-- Dukungan WASDA dan WABONDO
-- Penyimpanan transaksi ke SQLite
-- Riwayat transaksi
-- Cetak struk pembayaran
-- Integrasi Rajabiller API
-
----
-
-## Teknologi
-
-| Komponen | Teknologi |
-|---|---|
-| Backend | Node.js + Express |
-| Frontend | HTML + Bootstrap 5 + Vanilla JavaScript |
-| Database | SQLite |
-| Payment Provider | Rajabiller API |
-
----
-
-# Cara Menjalankan
-
-## 1. Pastikan Node.js Terinstall
-
-Minimal menggunakan:
-
-```bash
-Node.js 16+
-npm
-```
-
-Cek versi:
-
-```bash
-node -v
-npm -v
+┌───────────────┐
+│  Pilih PDAM   │
+└───────┬───────┘
+        ↓
+┌───────────────────┐
+│ Input ID Pelanggan│
+└────────┬──────────┘
+         ↓
+┌───────────────────┐
+│   🔎 INQUIRY      │
+│  Cek Tagihan      │
+└────────┬──────────┘
+         ↓
+┌───────────────────┐
+│ Detail Tagihan    │
+│ Nama / Periode    │
+│ Nominal / Admin   │
+└────────┬──────────┘
+         ↓
+┌───────────────────┐
+│  💳 PAYMENT       │
+│ Bayar Sekarang    │
+└────────┬──────────┘
+         ↓
+┌───────────────────┐
+│ ✅ TRANSAKSI      │
+│     SUKSES        │
+└────────┬──────────┘
+         ↓
+┌───────────────────┐
+│ 📋 Transaction    │
+│     History       │
+└────────┬──────────┘
+         ↓
+┌───────────────────┐
+│ 🧾 Cetak Struk    │
+└───────────────────┘
 ```
 
 ---
 
-## 2. Masuk ke Folder Project
+# 🚀 Quick Start
 
-```bash
-cd tes_loker
-```
+### Requirements
 
-Sesuaikan `tes_loker` dengan nama folder project jika berbeda.
+- Node.js v16+
+- npm
 
----
-
-## 3. Install Dependency
-
-Jalankan:
+### Install
 
 ```bash
 npm install
 ```
 
-Tunggu sampai seluruh dependency selesai di-install.
-
----
-
-## 4. Konfigurasi Rajabiller
-
-Pastikan konfigurasi provider pada `server.js` sudah benar:
-
-```javascript
-RAJABILLER_URL
-UID
-PIN
-```
-
-> Jangan commit UID dan PIN asli ke repository publik. Untuk penggunaan production, sebaiknya gunakan environment variable.
-
----
-
-## 5. Jalankan Server
+### Run
 
 ```bash
-npm start
-```
-
-Jika berhasil, server berjalan pada:
-
-```text
-http://localhost:3000
-```
-
-Kemudian buka browser:
-
-```text
-http://localhost:3000
-```
-
----
-
-# Alur Penggunaan
-
-```text
-Pilih Wilayah PDAM
-        │
-        ▼
-Masukkan ID Pelanggan
-        │
-        ▼
-     CEK TAGIHAN
-        │
-        ▼
-   Inquiry Rajabiller
-        │
-        ▼
- Tampilkan Detail Tagihan
-        │
-        ▼
-   BAYAR SEKARANG
-        │
-        ▼
-    Payment Rajabiller
-        │
-        ▼
-  Simpan Transaksi SQLite
-        │
-        ▼
-   Riwayat Transaksi
-        │
-        ▼
-       Cetak Struk
-```
-
----
-
-# Struktur Project
-
-```text
-tes_loker/
-│
-├── server.js
-├── package.json
-├── database.sqlite
-├── README.md
-│
-└── public/
-    ├── index.html
-    ├── history.html
-    └── struk.html
-```
-
-### File utama
-
-| File | Fungsi |
-|---|---|
-| `server.js` | Backend Express dan integrasi Rajabiller |
-| `public/index.html` | Halaman inquiry dan pembayaran |
-| `public/history.html` | Riwayat transaksi |
-| `public/struk.html` | Tampilan/cetak struk |
-| `database.sqlite` | Database transaksi |
-
-Database dan tabel transaksi dibuat otomatis ketika aplikasi dijalankan.
-
----
-
-# API
-
-## Inquiry
-
-```http
-POST /api/inquiry
-```
-
-Contoh request:
-
-```json
-{
-  "kode_produk": "WASDA",
-  "idpel": "01002676"
-}
-```
-
-Digunakan untuk mengambil informasi tagihan pelanggan.
-
----
-
-## Payment
-
-```http
-POST /api/payment
-```
-
-Digunakan untuk melakukan pembayaran berdasarkan hasil inquiry.
-
----
-
-## History
-
-```http
-GET /api/history
-```
-
-Mengambil data riwayat transaksi dari database.
-
----
-
-# Database
-
-Aplikasi menggunakan SQLite dengan tabel:
-
-```text
-transactions
-```
-
-Data yang disimpan antara lain:
-
-- ID pelanggan
-- Nama pelanggan
-- Alamat
-- Nominal tagihan
-- Biaya admin
-- Total pembayaran
-- Referensi transaksi
-- Status transaksi
-- Response provider
-- Waktu transaksi
-
----
-
-# Konfigurasi Port
-
-Default:
-
-```text
-3000
-```
-
-Untuk menggunakan port lain:
-
-```bash
-PORT=4000 npm start
-```
-
-Kemudian buka:
-
-```text
-http://localhost:4000
-```
-
----
-
-# Troubleshooting
-
-### `npm install` gagal
-
-Pastikan Node.js dan npm sudah terinstall:
-
-```bash
-node -v
-npm -v
-```
-
-Kemudian coba:
-
-```bash
-rm -rf node_modules
-npm install
-```
-
-### Port 3000 sudah digunakan
-
-Gunakan port lain:
-
-```bash
-PORT=4000 npm start
-```
-
-### Inquiry mendapatkan `Bad Request`
-
-Jika aplikasi dapat dijalankan tetapi inquiry/payment ke Rajabiller gagal, periksa:
-
-1. `UID` dan `PIN`
-2. URL Rajabiller
-3. Format payload
-4. IP server yang digunakan
-5. Status whitelist IP di Rajabiller
-
-Pada pengujian sebelumnya, request ke Rajabiller mendapatkan `Bad Request` karena IP server belum di-whitelist oleh provider. Akibatnya, **UI, database, dan alur aplikasi tetap dapat diuji, tetapi inquiry/payment nyata belum dapat diuji end-to-end**.
-
----
-
-# Status Pengujian
-
-| Komponen | Status |
-|---|---|
-| Install dependency | ✅ |
-| Server Express | ✅ |
-| Frontend | ✅ |
-| Database SQLite | ✅ |
-| Inquiry UI | ✅ |
-| History | ✅ |
-| Cetak struk | ✅ |
-| Integrasi Rajabiller | ⚠️ Menunggu whitelist IP |
-| Payment production | ⚠️ Menunggu whitelist IP |
-
----
-
-# Quick Start
-
-Jika konfigurasi Rajabiller sudah siap:
-
-```bash
-git clone <repository>
-cd tes_loker
-npm install
 npm start
 ```
 
@@ -403,10 +80,351 @@ Buka:
 http://localhost:3000
 ```
 
-**Selesai.**
+---
 
-Aplikasi siap digunakan untuk melakukan:
+# ✅ Real Integration Test
+
+Pengujian dilakukan menggunakan **response aktual dari Rajabiller**, bukan mock response.
+
+## 🟢 Test 1 — WASDA / PDAM Sidoarjo
+
+### Inquiry
+
+**ID Pelanggan**
 
 ```text
-Inquiry → Payment → History → Cetak Struk
+01002676
+```
+
+**Result**
+
+```text
+Status       : 00
+Keterangan   : SUKSES
+PDAM         : PDAM SIDOARJO
+Customer     : PERM. BUMI CITRA FAJ
+Tagihan      : Rp294.500
+Biaya Admin  : Rp10.806
+Jumlah Bulan : 6
+```
+
+Rajabiller mengembalikan detail tagihan untuk **6 periode**.
+
+### Payment
+
+Payment dikirim menggunakan:
+
+```text
+method       : fastpay.pay
+kode_produk  : WASDA
+idpel        : 01002676
+nominal      : 294500
+```
+
+**Result**
+
+```text
+Status       : 00
+Keterangan   : SUKSES
+Nominal      : Rp294.500
+```
+
+✅ **Payment berhasil diproses oleh Rajabiller.**
+
+---
+
+# 🔵 Test 2 — WABONDO / PDAM Bondowoso
+
+### Inquiry
+
+**ID Pelanggan**
+
+```text
+09000879
+```
+
+**Result**
+
+```text
+Status       : 00
+Keterangan   : EXT: REQUEST SUKSES.
+PDAM         : PDAM BONDOWOSO
+Customer     : DWI YULIANA
+Tagihan      : Rp94.130
+Biaya Admin  : Rp7.500
+Jumlah Bulan : 3
+```
+
+Rajabiller mengembalikan detail tagihan untuk **3 periode**.
+
+### Payment
+
+Payment dikirim menggunakan:
+
+```text
+method       : fastpay.pay
+kode_produk  : WABONDO
+idpel        : 09000879
+nominal      : 94130
+```
+
+**Result**
+
+```text
+Status       : 00
+Keterangan   : EXT: PAYMENT SUKSES.
+Nominal      : Rp94.130
+```
+
+✅ **Payment berhasil diproses oleh Rajabiller.**
+
+---
+
+# 📊 Integration Test Summary
+
+| Product | Provider | Inquiry | Payment |
+|---|---|---:|---:|
+| WASDA | Rajabiller | ✅ Success | ✅ Success |
+| WABONDO | Rajabiller | ✅ Success | ✅ Success |
+
+### Yang berhasil dibuktikan
+
+- ✅ Request dari aplikasi ke Rajabiller
+- ✅ Inquiry real data
+- ✅ Parsing response Rajabiller
+- ✅ Menampilkan informasi pelanggan
+- ✅ Menampilkan detail tagihan
+- ✅ Payment real request
+- ✅ Payment response berhasil
+- ✅ Reference transaction
+- ✅ Penyimpanan transaksi
+- ✅ History transaksi
+- ✅ Generate / print receipt
+
+---
+
+# 🔄 API Flow
+
+### Inquiry
+
+```text
+Frontend
+   │
+   │ POST /api/inquiry
+   ↓
+Backend
+   │
+   │ fastpay.inq
+   ↓
+Rajabiller
+   │
+   │ status: 00
+   ↓
+Backend
+   │
+   ↓
+Frontend
+   │
+   ↓
+Detail Tagihan
+```
+
+### Payment
+
+```text
+Frontend
+   │
+   │ POST /api/payment
+   ↓
+Backend
+   │
+   │ fastpay.pay
+   ↓
+Rajabiller
+   │
+   │ status: 00
+   ↓
+Backend
+   │
+   ├── Save Transaction
+   │
+   ↓
+Frontend
+   │
+   ↓
+Payment Success
+   │
+   ↓
+History → Receipt
+```
+
+---
+
+# 🧾 Contoh Data Response
+
+Berikut contoh struktur response yang diterima dari Rajabiller:
+
+```json
+{
+  "kodeproduk": "WASDA",
+  "idpelanggan1": "01002676",
+  "nominal": "294500",
+  "biayaadmin": "10806",
+  "ref1": "REF...",
+  "ref2": "2818949083",
+  "status": "00",
+  "keterangan": "SUKSES",
+  "billquantity": "6",
+  "customername": "PERM. BUMI CITRA FAJ",
+  "customeraddress": "SEKAWAN SEJUK C.16A",
+  "pdamname": "PDAM SIDOARJO"
+}
+```
+
+> Credential seperti `uid` dan `pin` tidak ditampilkan pada dokumentasi publik.
+
+---
+
+# 📋 Fitur Aplikasi
+
+### 🔎 Inquiry
+
+- Pilih produk PDAM
+- Input ID Pelanggan
+- Request ke Rajabiller
+- Menampilkan informasi pelanggan
+- Menampilkan jumlah periode tagihan
+- Menampilkan nominal tagihan
+- Menampilkan biaya administrasi
+
+### 💳 Payment
+
+- Menggunakan data hasil inquiry
+- Membentuk payload `fastpay.pay`
+- Mengirim request ke Rajabiller
+- Memproses status transaksi
+- Menyimpan transaksi berhasil
+
+### 📚 History
+
+Menampilkan transaksi yang sudah diproses:
+
+- Produk PDAM
+- ID Pelanggan
+- Nama pelanggan
+- Nominal
+- Biaya admin
+- Total pembayaran
+- Reference
+- Status
+- Waktu transaksi
+
+### 🧾 Receipt
+
+- Detail transaksi
+- Detail pelanggan
+- Detail tagihan
+- Status pembayaran
+- Reference transaksi
+- Print-friendly layout
+
+---
+
+# 🧪 Testing Notes
+
+Testing dilakukan menggunakan **real integration environment Rajabiller**.
+
+Pada tahap awal testing terdapat kendala `Bad Request` yang berkaitan dengan whitelist IP. Setelah akses dapat digunakan, dilakukan pengujian ulang dan diperoleh hasil:
+
+```text
+WASDA
+Inquiry  → SUCCESS
+Payment  → SUCCESS
+
+WABONDO
+Inquiry  → SUCCESS
+Payment  → SUCCESS
+```
+
+Dengan demikian, flow utama aplikasi telah berhasil diuji sampai tahap **payment**.
+
+---
+
+# ⚙️ Technology Stack
+
+| Component | Technology |
+|---|---|
+| Backend | Node.js + Express |
+| Frontend | HTML + Bootstrap 5 + Vanilla JavaScript |
+| Database | SQLite |
+| Payment Provider | Rajabiller API |
+
+---
+
+# 📁 Project Structure
+
+```text
+tes_loker/
+│
+├── server.js
+├── package.json
+├── database.sqlite
+│
+├── public/
+│   ├── index.html
+│   ├── history.html
+│   └── struk.html
+│
+└── README.md
+```
+
+---
+
+# 🔌 API Endpoint
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/inquiry` | Inquiry tagihan |
+| `POST` | `/api/payment` | Pembayaran |
+| `GET` | `/api/history` | Riwayat transaksi |
+
+---
+
+# 👨‍💻 Project
+
+**PPOB PDAM — Technical Test**
+
+Developer: **Ardy Rendra**
+
+Fokus implementasi:
+
+> **Inquiry → Payment → History → Receipt**
+
+---
+
+## 🎬 Demo Checklist
+
+Untuk reviewer, aplikasi dapat diuji dengan flow berikut:
+
+```text
+1. npm install
+2. npm start
+3. Open http://localhost:3000
+4. Pilih WASDA / WABONDO
+5. Masukkan ID Pelanggan
+6. Klik "Cek Tagihan"
+7. Review detail tagihan
+8. Klik "Bayar"
+9. Cek status transaksi
+10. Buka History
+11. Buka & Print Receipt
+```
+
+**Expected Result:**
+
+```text
+Inquiry  → ✅
+Payment  → ✅
+History  → ✅
+Receipt  → ✅
 ```
