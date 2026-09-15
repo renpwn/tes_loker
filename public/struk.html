@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="id" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Struk Pembayaran Resmi PDAM</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212 !important;
+            color: #e0e0e0 !important;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .receipt-card {
+            max-width: 520px;
+            margin: 30px auto;
+            background: #1e1e1e !important;
+            padding: 30px;
+            border: 1px dashed #404040;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        .receipt-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            margin-bottom: 2px;
+        }
+        .receipt-sub {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #888;
+            margin-bottom: 12px;
+        }
+        .receipt-row {
+            display: flex;
+            font-size: 0.85rem;
+            margin-bottom: 3px;
+        }
+        .receipt-row .label {
+            width: 150px;
+            color: #999;
+        }
+        .receipt-row .value {
+            flex: 1;
+            color: #e0e0e0;
+            word-break: break-word;
+        }
+        .receipt-section-title {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #0dcaf0;
+            margin: 12px 0 6px 0;
+            letter-spacing: 1px;
+        }
+        
+        /* Rincian bulan menjorok ke dalam */
+        .receipt-detail-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.83rem;
+            margin-bottom: 2px;
+            padding-left: 20px; /* Menjorok ke dalam */
+        }
+        
+        /* Baris denda dan admin lurus rata (tidak menjorok) */
+        .receipt-flat-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.83rem;
+            margin-bottom: 2px;
+            padding-left: 0px; 
+        }
+
+        .receipt-detail-row .kiri, .receipt-flat-row .kiri {
+            color: #ccc;
+        }
+        .receipt-detail-row .kanan, .receipt-flat-row .kanan {
+            color: #e0e0e0;
+        }
+        .receipt-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px dashed #555;
+        }
+        .receipt-total .kanan {
+            color: #ffc107;
+        }
+        .receipt-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 18px;
+            line-height: 1.4;
+        }
+
+        @media print {
+            body { background: #fff !important; color: #000 !important; }
+            .no-print { display: none !important; }
+            .receipt-card {
+                background: #fff !important; color: #000 !important;
+                border: none; box-shadow: none; margin: 0; padding: 0;
+                max-width: 100%;
+            }
+            .receipt-title, .receipt-sub, .receipt-row .value,
+            .receipt-detail-row .kanan, .receipt-flat-row .kanan, .receipt-footer {
+                color: #000 !important;
+            }
+            .receipt-row .label, .receipt-detail-row .kiri, .receipt-flat-row .kiri { color: #555 !important; }
+            .receipt-section-title { color: #000 !important; }
+            .receipt-total .kanan { color: #000 !important; }
+            .receipt-total { border-color: #000 !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="receipt-card">
+            <div class="receipt-title" id="titlePdam">STRUK PEMBAYARAN PDAM</div>
+            <div class="receipt-sub">BUKTI TRANSAKSI SAH PPOB</div>
+            
+            <div class="receipt-row mt-2"><div class="label">TANGGAL</div><div class="value" id="valWaktu">: -</div></div>
+            <div class="receipt-row"><div class="label">NO. RESI</div><div class="value" id="valRef">: -</div></div>
+            <div class="receipt-row"><div class="label">NAMA PAM</div><div class="value" id="valPdam">: -</div></div>
+            <div class="receipt-row"><div class="label">NO. PELANGGAN</div><div class="value" id="valIdpel">: -</div></div>
+            <div class="receipt-row"><div class="label">NAMA</div><div class="value" id="valNama">: -</div></div>
+            <div class="receipt-row"><div class="label">ALAMAT</div><div class="value" id="valAlamat">: -</div></div>
+
+            <div class="receipt-section-title">RINCIAN TAGIHAN</div>
+            <div id="rincianBulan"></div>
+
+            <!-- Baris Denda & Admin (Tidak menjorok) -->
+            <div class="receipt-flat-row" id="rowDenda" style="display: none;">
+                <span class="kiri">DENDA</span>
+                <span class="kanan" id="valDenda">Rp 0</span>
+            </div>
+            <div class="receipt-flat-row" id="rowBeban" style="display: none;">
+                <span class="kiri">BEBAN</span>
+                <span class="kanan" id="valBeban">Rp 0</span>
+            </div>
+            <div class="receipt-flat-row">
+                <span class="kiri">ADMIN</span>
+                <span class="kanan" id="valAdmin">Rp 0</span>
+            </div>
+
+            <div class="receipt-total">
+                <span>TOTAL TAGIHAN</span>
+                <span class="kanan" id="valTotal">Rp 0</span>
+            </div>
+
+            <div class="receipt-section-title mt-3">TERBILANG :</div>
+            <div class="receipt-row">
+                <div class="value text-uppercase fw-bold" id="valTerbilang" style="font-size: 0.8rem; color: #0dcaf0;">-</div>
+            </div>
+
+            <div class="receipt-footer mt-4" id="footerText">
+                PDAM MENYATAKAN STRUK INI<br>SEBAGAI BUKTI PEMBAYARAN YANG SAH
+            </div>
+
+            <!-- Tombol Aksi (Hilang saat diprint) -->
+            <div class="text-center mt-4 no-print">
+                <button onclick="window.print()" class="btn btn-info btn-sm px-4 fw-bold me-2">Cetak / Simpan PDF</button>
+                <a href="history.html" class="btn btn-secondary btn-sm px-4">Kembali</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const txId = urlParams.get('id');
+
+        const BULAN_ID = {
+            '1': 'MEI', '2': 'JUN', '3': 'JUL', '4': 'AGS', '5': 'SEP', '6': 'OKT',
+            '7': 'NOV', '8': 'DES', '9': 'JAN', '10': 'FEB', '11': 'MAR', '12': 'APR'
+        }; // Sesuai data sampel contoh (atau nama bulan generik)
+
+        const NAMA_BULAN_STANDARD = {
+            '1': 'JAN', '2': 'FEB', '3': 'MAR', '4': 'APR', '5': 'MEI', '6': 'JUN',
+            '7': 'JUL', '8': 'AGS', '9': 'SEP', '10': 'OKT', '11': 'NOV', '12': 'DES'
+        };
+
+        function formatRupiahCustom(n) {
+            return 'Rp ' + (parseFloat(n) || 0).toLocaleString('id-ID');
+        }
+
+        // Fungsi konverter angka ke Terbilang Bahasa Indonesia
+        function terbilang(nilai) {
+            const angka = Math.abs(nilai);
+            const huruf = ['', 'SATU', 'DUA', 'TIGA', 'EMPAT', 'LIMA', 'ENAM', 'TUJUH', 'DELAPAN', 'SEMBILAN', 'SEPULUH', 'SEBELAS'];
+            let temp = '';
+            if (angka < 12) {
+                temp = ' ' + huruf[angka];
+            } else if (angka < 20) {
+                temp = terbilang(angka - 10) + ' BELAS';
+            } else if (angka < 100) {
+                temp = terbilang(Math.floor(angka / 10)) + ' PULUH' + terbilang(angka % 10);
+            } else if (angka < 200) {
+                temp = ' SERATUS' + terbilang(angka - 100);
+            } else if (angka < 1000) {
+                temp = terbilang(Math.floor(angka / 100)) + ' RATUS' + terbilang(angka % 100);
+            } else if (angka < 2000) {
+                temp = ' SERIBU' + terbilang(angka - 1000);
+            } else if (angka < 1000000) {
+                temp = terbilang(Math.floor(angka / 1000)) + ' RIBU' + terbilang(angka % 1000);
+            } else if (angka < 1000000000) {
+                temp = terbilang(Math.floor(angka / 1000000)) + ' JUTA' + terbilang(angka % 1000000);
+            }
+            return temp;
+        }
+
+        async function loadStrukData() {
+            if (!txId) {
+                alert('ID Transaksi tidak ditemukan!');
+                window.location.href = 'history.html';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/history');
+                const transactions = await response.json();
+                const tx = transactions.find(item => item.id == txId);
+
+                if (!tx) {
+                    alert('Data transaksi tidak ditemukan.');
+                    window.location.href = 'history.html';
+                    return;
+                }
+
+                let rd = {};
+                try {
+                    rd = typeof tx.response_data === 'string' ? JSON.parse(tx.response_data) : (tx.response_data || {});
+                } catch (e) {
+                    rd = {};
+                }
+
+                const namaPdam = (rd.pdamname || tx.nama_pdam || 'PDAM').toUpperCase();
+                document.getElementById('titlePdam').textContent = `STRUK PEMBAYARAN ${namaPdam}`;
+                document.getElementById('valWaktu').textContent = `: ${tx.created_at}`;
+                document.getElementById('valRef').textContent = `: ${rd.ref2 || tx.ref2 || tx.ref1}`;
+                document.getElementById('valPdam').textContent = `: ${namaPdam}`;
+                document.getElementById('valIdpel').textContent = `: ${rd.customerid1 || tx.idpel}`;
+                document.getElementById('valNama').textContent = `: ${rd.customername || tx.nama || '-'}`;
+                document.getElementById('valAlamat').textContent = `: ${rd.customeraddress || tx.alamat || '-'}`;
+
+                // Rincian Bulan, Denda & Beban
+                let rincianHtml = '';
+                let totalDenda = 0;
+                let totalBeban = 0;
+
+                for (let i = 1; i <= 6; i++) {
+                    const bln = rd[`monthperiod${i}`];
+                    const thn = rd[`yearperiod${i}`];
+                    const bill = parseFloat(rd[`billamount${i}`] || 0);
+                    const penalty = parseFloat(rd[`penalty${i}`] || 0);
+                    const misc = rd[`miscamount${i}`] || '';
+
+                    if (bln && thn && (bill > 0 || penalty > 0 || misc)) {
+                        const namaBulan = NAMA_BULAN_STANDARD[String(bln)] || bln;
+                        rincianHtml += `
+                            <div class="receipt-detail-row">
+                                <span class="kiri">${namaBulan} ${thn}</span>
+                                <span class="kanan">${formatRupiahCustom(bill)}</span>
+                            </div>
+                        `;
+                        totalDenda += penalty;
+
+                        // Ekstraksi nilai beban dari format "0|16150" pada miscamount
+                        if (misc.includes('|')) {
+                            const parts = misc.split('|');
+                            const bebanPart = parseFloat(parts[1] || 0);
+                            totalBeban += bebanPart;
+                        } else {
+                            totalBeban += parseFloat(misc || 0);
+                        }
+                    }
+                }
+
+                if (!rincianHtml) {
+                    rincianHtml = `
+                        <div class="receipt-detail-row">
+                            <span class="kiri">TAGIHAN UTAMA</span>
+                            <span class="kanan">${formatRupiahCustom(tx.nominal)}</span>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('rincianBulan').innerHTML = rincianHtml;
+
+                // Tampilkan Denda jika ada
+                if (totalDenda > 0) {
+                    document.getElementById('rowDenda').style.display = 'flex';
+                    document.getElementById('valDenda').textContent = formatRupiahCustom(totalDenda);
+                }
+
+                // Tampilkan Beban jika hasil ekstrak miscamount > 0
+                if (totalBeban > 0) {
+                    document.getElementById('rowBeban').style.display = 'flex';
+                    document.getElementById('valBeban').textContent = formatRupiahCustom(totalBeban);
+                }
+
+                // Ambil biaya admin dari properti 'biayaadmin' di JSON
+                const biayaAdminVal = parseFloat(rd.biayaadmin || tx.admin || 0);
+                document.getElementById('valAdmin').textContent = formatRupiahCustom(biayaAdminVal);
+                document.getElementById('valTotal').textContent = formatRupiahCustom(tx.total_bayar);
+
+                // Terbilang
+                const terbilangStr = terbilang(tx.total_bayar) + ' RUPIAH';
+                document.getElementById('valTerbilang').textContent = terbilangStr;
+
+                document.getElementById('footerText').innerHTML =
+                    `${namaPdam} MENYATAKAN STRUK INI<br>SEBAGAI BUKTI PEMBAYARAN YANG SAH`;
+
+            } catch (error) {
+                console.error(error);
+                alert('Gagal memuat detail struk.');
+            }
+        }
+
+        loadStrukData();
+    </script>
+</body>
+</html>

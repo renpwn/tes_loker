@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="id" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cek & Bayar Tagihan PDAM</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212 !important;
+            color: #e0e0e0 !important;
+        }
+        .card {
+            background-color: #1e1e1e !important;
+            border: 1px solid #2d2d2d !important;
+        }
+        .form-control, .form-select {
+            background-color: #2b2b2b !important;
+            color: #ffffff !important;
+            border-color: #404040 !important;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #2b2b2b !important;
+            color: #ffffff !important;
+            border-color: #0dcaf0 !important;
+            box-shadow: 0 0 0 0.25rem rgba(13, 202, 240, 0.25);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-dark border-bottom border-secondary text-white d-flex justify-content-between align-items-center py-3">
+                        <h4 class="mb-0 fw-bold">PPOB PDAM (Sidoarjo & Bondowoso)</h4>
+                        <a href="history.html" class="btn btn-outline-light btn-sm">History Transaksi</a>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- Form Inquiry -->
+                        <form id="formInquiry">
+                            <div class="mb-3">
+                                <label for="kode_produk" class="form-label text-secondary fw-semibold">Pilih Wilayah PDAM</label>
+                                <select class="form-select" id="kode_produk" required>
+                                    <option value="" disabled selected>-- Pilih Wilayah --</option>
+                                    <option value="WASDA">PDAM Sidoarjo (WASDA)</option>
+                                    <option value="WABONDO">PDAM Bondowoso (WABONDO)</option>
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label for="idpel" class="form-label text-secondary fw-semibold">ID Pelanggan</label>
+                                <input type="text" class="form-control" id="idpel" placeholder="Masukkan ID Pelanggan" required>
+                            </div>
+                            <button type="submit" class="btn btn-outline-light w-100 fw-bold py-2" id="btnInquiry">Cek Tagihan</button>
+                        </form>
+
+                        <!-- Bagian Hasil Inquiry (Hidden Default) -->
+                        <div id="resultSection" class="mt-4 d-none">
+                            <hr class="border-secondary">
+                            <h5 class="text-info mb-3 fw-semibold">Detail Tagihan Pelanggan</h5>
+                            <table class="table table-dark table-bordered border-secondary">
+                                <tr>
+                                    <td width="35%" class="text-secondary">Nama Pelanggan</td>
+                                    <td id="valNama" class="fw-bold">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-secondary">Alamat</td>
+                                    <td id="valAlamat">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-secondary">Periode Tagihan</td>
+                                    <td id="valPeriode">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-secondary">Nominal Tagihan</td>
+                                    <td id="valNominal">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-secondary">Biaya Admin</td>
+                                    <td id="valAdmin">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-secondary">Total Bayar</td>
+                                    <td><strong id="valTotal" class="text-warning fs-5">-</strong></td>
+                                </tr>
+                            </table>
+
+                            <button type="button" class="btn btn-outline-success w-100 fw-bold py-2 mt-3" id="btnPayment">Bayar Sekarang</button>
+                        </div>
+
+                        <!-- Status Alert -->
+                        <div id="alertBox" class="alert mt-3 d-none" role="alert"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logika Frontend -->
+    <script>
+        const PDAM_MAP = {
+            'WASDA':   { idpel: '01002676', nama: 'PDAM Sidoarjo' },
+            'WABONDO': { idpel: '09000879', nama: 'PDAM Bondowoso' }
+        };
+
+        // Reverse map: idpel → kode_produk
+        const IDPEL_MAP = {
+            '01002676': 'WASDA',
+            '09000879': 'WABONDO'
+        };
+
+        const selectProduk = document.getElementById('kode_produk');
+        const inputIdpel = document.getElementById('idpel');
+
+        // Dropdown → Input IDPel
+        selectProduk.addEventListener('change', () => {
+            const selected = selectProduk.value;
+            if (PDAM_MAP[selected]) {
+                inputIdpel.value = PDAM_MAP[selected].idpel;
+            }
+        });
+
+        // Input IDPel → Dropdown
+        // inputIdpel.addEventListener('input', () => {
+        //     const idpel = inputIdpel.value.trim();
+        //     if (IDPEL_MAP[idpel]) {
+        //         selectProduk.value = IDPEL_MAP[idpel];
+        //     } else {
+        //         selectProduk.value = ''; // reset kalau tidak match
+        //     }
+        // });
+
+        let inquiryDataGlobal = {};
+
+        const formInquiry = document.getElementById('formInquiry');
+        const btnInquiry = document.getElementById('btnInquiry');
+        const resultSection = document.getElementById('resultSection');
+        const alertBox = document.getElementById('alertBox');
+        const btnPayment = document.getElementById('btnPayment');
+
+        formInquiry.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const kode_produk = document.getElementById('kode_produk').value;
+            const idpel = document.getElementById('idpel').value;
+
+            resultSection.classList.add('d-none');
+            alertBox.classList.add('d-none');
+            btnInquiry.disabled = true;
+            btnInquiry.textContent = 'Memeriksa Tagihan...';
+
+            try {
+                const response = await fetch('/api/inquiry', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ kode_produk, idpel })
+                });
+                const result = await response.json();
+                console.log('Inquiry result:', result); // debug
+                
+                // Cek sukses: status === '00' ATAU ada nominal & idpelanggan
+                const isSuccess = result.status === '00' || (result.nominal && result.idpelanggan1);
+
+                if (isSuccess) {
+                    const nominal = parseFloat(result.nominal || 0);
+                    const admin = parseFloat(result.biayaadmin || result.admin || 2500);
+                    const total = parseFloat(result.total_bayar || result.totalbayar || (nominal + admin));
+
+                    inquiryDataGlobal = {
+                        kode_produk,
+                        nama_pdam: kode_produk === 'WASDA' ? 'PDAM Sidoarjo' : 'PDAM Bondowoso',
+                        idpel,
+                        idpel2: result.idpelanggan2 || '',
+                        idpel3: result.idpelanggan3 || '',
+                        nama: result.nama || result.idpelanggan2 || 'N/A',
+                        alamat: result.alamat || result.idpelanggan2 || 'N/A',
+                        nominal,
+                        admin,
+                        total_bayar: total,
+                        ref1: result.ref1,
+                        ref2: result.ref2 || ''
+                    };
+
+                    document.getElementById('valNama').textContent = inquiryDataGlobal.nama;
+                    document.getElementById('valAlamat').textContent = inquiryDataGlobal.alamat;
+                    document.getElementById('valPeriode').textContent = result.jumlah_bulan ? `${result.jumlah_bulan} Bulan` : '-';
+                    document.getElementById('valNominal').textContent = 'Rp ' + nominal.toLocaleString('id-ID');
+                    document.getElementById('valAdmin').textContent = 'Rp ' + admin.toLocaleString('id-ID');
+                    document.getElementById('valTotal').textContent = 'Rp ' + total.toLocaleString('id-ID');
+
+                    resultSection.classList.remove('d-none');
+                } else {
+                    showAlert('Gagal: ' + (result.ket || result.message || 'Terjadi kesalahan sistem.'), 'danger');
+                }
+            } catch (error) {
+                showAlert('Gagal terhubung ke server internal.', 'danger');
+            } finally {
+                btnInquiry.disabled = false;
+                btnInquiry.textContent = 'Cek Tagihan';
+            }
+        });
+
+        btnPayment.addEventListener('click', async () => {
+            if (!confirm('Lanjutkan pembayaran tagihan ini?')) return;
+
+            btnPayment.disabled = true;
+            btnPayment.textContent = 'Memproses Pembayaran...';
+
+            try {
+                const response = await fetch('/api/payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(inquiryDataGlobal)
+                });
+                const result = await response.json();                
+                console.log('Payment result:', result); // debug
+
+                if (result.status === '00') {
+                    showAlert('Pembayaran BERHASIL! Mengalihkan ke riwayat...', 'success');
+                    setTimeout(() => { window.location.href = 'history.html'; }, 1500);
+                } else {
+                    showAlert('Pembayaran Gagal: ' + (result.ket || 'Unknown error'), 'danger');
+                    btnPayment.disabled = false;
+                    btnPayment.textContent = 'Bayar Sekarang';
+                }
+            } catch (error) {
+                showAlert('Terjadi kesalahan saat memproses pembayaran.', 'danger');
+                btnPayment.disabled = false;
+                btnPayment.textContent = 'Bayar Sekarang';
+            }
+        });
+
+        function showAlert(message, type) {
+            alertBox.className = `alert alert-${type} mt-3`;
+            alertBox.textContent = message;
+            alertBox.classList.remove('d-none');
+        }
+    </script>
+</body>
+</html>
